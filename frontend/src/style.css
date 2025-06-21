@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-color: #1f1f1f;
+  --nav-bg: #1e293b;
+  --nav-text: #ffffff;
+  --text-color: #ffffff;
+  --input-bg: #2a2a2a;
+  --shadow: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="light"] {
+  --bg-color: #ffffff;
+  --nav-bg: #0f172a;
+  --nav-text: #ffffff;
+  --text-color: #000000;
+  --input-bg: #f3f3f3;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  background-image: url("/src/assets/bg-pattern.svg");
+  background-repeat: repeat;
+  background-attachment: fixed;
+  background-size: auto;
+}

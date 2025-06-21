@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,10 @@ public class BookingService {
     public Booking getBooking(Long id) {
         return bookingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+    }
+
+    public List<Booking> getBookings() {
+        return bookingRepository.findAll();
     }
 }
 
