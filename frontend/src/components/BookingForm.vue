@@ -27,6 +27,7 @@
 import { ref, computed } from "vue";
 import type { BookingRequest, BookingResponse } from "../types/booking";
 import { createBooking } from "../api";
+import dayjs from "dayjs";
 
 const form = ref<BookingRequest>({
   userEmail: "",
@@ -37,6 +38,7 @@ const response = ref<BookingResponse | null>(null);
 
 const submitBooking = async () => {
   try {
+    form.value.slot = dayjs(form.value.slot).format("YYYY-MM-DDTHH:mm:ss");
     const res = await createBooking(form.value);
     response.value = res;
   } catch (err) {

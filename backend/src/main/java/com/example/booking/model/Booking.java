@@ -18,7 +18,7 @@ public class Booking {
 
     private String userEmail;
 
-    private String slot;
+    private LocalDateTime slot;
 
     private LocalDateTime bookingTime;
 

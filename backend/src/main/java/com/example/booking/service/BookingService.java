@@ -24,7 +24,7 @@ public class BookingService {
     private final ObjectMapper objectMapper;
 
     public Booking createBooking(BookingRequest request) {
-
+        System.out.println("Received slot: " + request.getSlot());
         String slotKey = "slot:" + request.getSlot();
 
         if (!slotAvailabilityService.isSlotAvailable(slotKey)) {
