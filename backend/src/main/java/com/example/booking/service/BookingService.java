@@ -55,6 +55,10 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
     }
 
+    public List<Booking> getBookingsByEmail(String email) {
+        return bookingRepository.findByUserEmail(email);
+    }
+
     public List<Booking> getBookings() {
         return bookingRepository.findAll();
     }

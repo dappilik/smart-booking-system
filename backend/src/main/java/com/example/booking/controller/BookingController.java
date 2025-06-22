@@ -27,7 +27,10 @@ public class BookingController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Booking>> getBookings() {
+    public ResponseEntity<List<Booking>> getBookings(@RequestParam(required = false) String email) {
+        if (email != null) {
+            return ResponseEntity.ok(bookingService.getBookingsByEmail(email));
+        }
         return ResponseEntity.ok(bookingService.getBookings());
     }
 }
