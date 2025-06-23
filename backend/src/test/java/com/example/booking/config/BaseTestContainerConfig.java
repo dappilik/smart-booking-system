@@ -1,5 +1,6 @@
 package com.example.booking.config;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -32,6 +33,17 @@ public abstract class BaseTestContainerConfig {
     protected static final GenericContainer<?> redis = new GenericContainer<>("redis:7.2")
             .withExposedPorts(6379)
             .withReuse(true);
+
+    @BeforeAll
+    static void startContainers() {
+        postgres.start();
+        redis.start();
+        kafka.start();
+
+        System.out.println("✅ PostgreSQL: " + postgres.getJdbcUrl());
+        System.out.println("✅ Redis: " + redis.getHost() + ":" + redis.getMappedPort(6379));
+        System.out.println("✅ Kafka: " + kafka.getBootstrapServers());
+    }
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {

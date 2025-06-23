@@ -3,11 +3,13 @@ package com.example.booking.smoke;
 import com.example.booking.config.BaseTestContainerConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-class SmartBookingBackendApplicationSmokeTests extends BaseTestContainerConfig {
+@ActiveProfiles("test")
+public class SmartBookingBackendApplicationSmokeTests extends BaseTestContainerConfig {
 
 	@Test
 	void contextLoads() {

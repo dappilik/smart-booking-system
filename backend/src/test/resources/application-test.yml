@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:disabled
+    username: disabled
+    password: disabled
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  redis:
+    host: localhost
+    port: 0
+  kafka:
+    bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    org.springframework: WARN
+    com.example.booking: DEBUG
