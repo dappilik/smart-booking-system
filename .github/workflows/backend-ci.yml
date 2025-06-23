@@ -32,7 +32,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Run Integration Tests
-        run: cd backend && ./mvnw test -Dtest=*IT
+        run: |
+          cd backend
+          ./mvnw verify \
+             -Dtest=*IT \
+             -Dsurefire.timeout=180 \
+             -DforkedProcessTimeoutInSeconds=180 \
+              -Dsurefire.useSystemClassLoader=false
 
   smoke-test:
     runs-on: ubuntu-latest

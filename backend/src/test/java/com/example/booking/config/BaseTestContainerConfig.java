@@ -28,12 +28,14 @@ public abstract class BaseTestContainerConfig {
     @Container
     protected static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
             .waitingFor(Wait.forListeningPort())
+            .withStartupTimeout(Duration.ofSeconds(60))
             .withReuse(true);
 
     @Container
     protected static final GenericContainer<?> redis = new GenericContainer<>("redis:7.2")
             .withExposedPorts(6379)
             .waitingFor(Wait.forListeningPort())
+            .withStartupTimeout(Duration.ofSeconds(60))
             .withReuse(true);
 
     @BeforeAll
