@@ -5,9 +5,12 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import java.time.Duration;
 
 @Testcontainers
 public abstract class BaseTestContainerConfig {
@@ -17,6 +20,8 @@ public abstract class BaseTestContainerConfig {
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test")
+            .waitingFor(Wait.forListeningPort())
+            .withStartupTimeout(Duration.ofSeconds(60))
             .withReuse(true);
 
     @Container
@@ -33,6 +38,7 @@ public abstract class BaseTestContainerConfig {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgres::getDriverClassName);
 
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 

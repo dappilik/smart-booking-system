@@ -7,14 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-class SmartBookingBackendApplicationTests extends BaseTestContainerConfig {
+class SmartBookingBackendApplicationSmokeTests extends BaseTestContainerConfig {
 
 	@Test
 	void contextLoads() {
 	}
 
 	@Test
-	void postgresConnection() throws Exception {
+	void postgresConnection() {
 		assertTrue(postgres.isRunning());
 	}
 
