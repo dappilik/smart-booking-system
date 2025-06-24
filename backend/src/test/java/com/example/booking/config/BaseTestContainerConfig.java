@@ -1,6 +1,5 @@
 package com.example.booking.config;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -48,6 +47,8 @@ public abstract class BaseTestContainerConfig {
             Thread.sleep(2000); // Let ports settle
         } catch (InterruptedException ignored) {}
 
+        System.setProperty("spring.redis.host", redis.getHost());
+        System.setProperty("spring.redis.port", String.valueOf(redis.getFirstMappedPort()));
 
         System.out.println("✅ PostgreSQL: " + postgres.getJdbcUrl());
         System.out.println("✅ Redis: " + redis.getHost() + ":" + redis.getMappedPort(6379));
@@ -63,7 +64,7 @@ public abstract class BaseTestContainerConfig {
 
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 
-        registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
+//        registry.add("spring.redis.host", redis::getHost);
+//        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
     }
 }
