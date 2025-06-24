@@ -16,33 +16,38 @@ import java.time.Duration;
 @Testcontainers
 public abstract class BaseTestContainerConfig {
 
+    private static final DockerImageName POSTGRES_IMAGE = DockerImageName.parse("postgres:15");
+    private static final DockerImageName REDIS_IMAGE = DockerImageName.parse("redis:7.2");
+    private static final DockerImageName KAFKA_IMAGE = DockerImageName.parse("confluentinc/cp-kafka:7.6.0");
+
     @Container
-    protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+    protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_IMAGE)
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test")
-            .waitingFor(Wait.forListeningPort())
-            .withStartupTimeout(Duration.ofSeconds(60))
-            .withReuse(true);
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
+            .withReuse(false);
 
     @Container
-    protected static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
-            .waitingFor(Wait.forListeningPort())
-            .withStartupTimeout(Duration.ofSeconds(60))
-            .withReuse(true);
+    protected static final KafkaContainer kafka = new KafkaContainer(KAFKA_IMAGE)
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
+            .withReuse(false);
 
     @Container
-    protected static final GenericContainer<?> redis = new GenericContainer<>("redis:7.2")
+    protected static final GenericContainer<?> redis = new GenericContainer<>(REDIS_IMAGE)
             .withExposedPorts(6379)
-            .waitingFor(Wait.forListeningPort())
-            .withStartupTimeout(Duration.ofSeconds(60))
-            .withReuse(true);
+            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
+            .withReuse(false);
 
-    @BeforeAll
-    static void startContainers() {
+    static {
+        // Ensure containers are fully started before anything else
         postgres.start();
         redis.start();
         kafka.start();
+        try {
+            Thread.sleep(2000); // Let ports settle
+        } catch (InterruptedException ignored) {}
+
 
         System.out.println("✅ PostgreSQL: " + postgres.getJdbcUrl());
         System.out.println("✅ Redis: " + redis.getHost() + ":" + redis.getMappedPort(6379));
