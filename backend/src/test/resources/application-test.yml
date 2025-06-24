@@ -1,4 +1,7 @@
 spring:
+  redis:
+    host: dummy
+    port: 0
   datasource:
     url: jdbc:disabled
     username: disabled
