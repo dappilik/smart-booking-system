@@ -25,20 +25,30 @@ jobs:
     runs-on: ubuntu-latest
     needs: unit-tests
     name: ⚖️ Run Integration Tests
+    env:
+      TESTCONTAINERS_RYUK_DISABLED: true
+      DOCKER_HOST: unix:///var/run/docker.sock
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Docker
+        run: |
+          sudo systemctl start docker
+          docker info
+
       - uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
+
       - name: Run Integration Tests
         run: |
           cd backend
           ./mvnw verify \
-             -Dtest=*IT \
-             -Dsurefire.timeout=180 \
-             -DforkedProcessTimeoutInSeconds=180 \
-              -Dsurefire.useSystemClassLoader=false
+            -Dtest=*IT \
+            -Dsurefire.timeout=180 \
+            -DforkedProcessTimeoutInSeconds=180 \
+            -Dsurefire.useSystemClassLoader=false
 
   smoke-test:
     runs-on: ubuntu-latest
