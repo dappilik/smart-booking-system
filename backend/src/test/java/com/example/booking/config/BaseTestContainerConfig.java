@@ -12,7 +12,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
-import java.util.function.Supplier;
 
 @Testcontainers
 public abstract class BaseTestContainerConfig {
@@ -24,7 +23,8 @@ public abstract class BaseTestContainerConfig {
     @Container
     protected static final GenericContainer<?> redis = new GenericContainer<>(REDIS_IMAGE)
             .withExposedPorts(6379)
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
+            .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*\\n", 1))
+            .withStartupTimeout(Duration.ofMinutes(2))
             .withReuse(false);
 
     @Container
@@ -32,27 +32,24 @@ public abstract class BaseTestContainerConfig {
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test")
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1))
+            .withStartupTimeout(Duration.ofMinutes(2))
             .withReuse(false);
 
     @Container
     protected static final KafkaContainer kafka = new KafkaContainer(KAFKA_IMAGE)
-            .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofSeconds(60)))
+            .waitingFor(Wait.forLogMessage(".*\\[KafkaServer id=\\d+\\] started.*", 1))
+            .withStartupTimeout(Duration.ofMinutes(2))
             .withReuse(false);
 
 
 
     @BeforeAll
     static void startContainers() {
-        System.out.println("✅ Starting test containers...");
         // Ensure containers are fully started before anything else
         redis.start();
         postgres.start();
         kafka.start();
-        try {
-            Thread.sleep(2000); // Let ports settle
-        } catch (InterruptedException ignored) {}
-
 
         System.out.println("✅ PostgreSQL: " + postgres.getJdbcUrl());
         System.out.println("✅ Redis: " + redis.getHost() + ":" + redis.getMappedPort(6379));
@@ -70,8 +67,6 @@ public abstract class BaseTestContainerConfig {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 
         registry.add("spring.redis.host", redis::getHost);
-        Supplier<Object> objectSupplier = () -> redis.getMappedPort(6379);
-        registry.add("spring.redis.port", objectSupplier);
-        System.out.println("completed dynamic properties: " + objectSupplier.get().toString());
+        registry.add("spring.redis.port",  () -> redis.getMappedPort(6379));
     }
 }

@@ -1,6 +1,7 @@
 package com.example.booking.integration;
 
 import com.example.booking.config.BaseTestContainerConfig;
+import com.example.booking.config.RedisTestConfig;
 import com.example.booking.model.Booking;
 import com.example.booking.model.BookingRequest;
 import com.example.booking.repository.BookingRepository;
@@ -9,7 +10,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Testcontainers
-@ActiveProfiles("test")
+@Import({RedisTestConfig.class})
 class BookingServiceIT extends BaseTestContainerConfig {
 
     @Autowired

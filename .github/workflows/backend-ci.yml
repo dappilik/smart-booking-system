@@ -37,7 +37,6 @@ jobs:
         image: docker:dind
         options: --privileged
     env:
-      TESTCONTAINERS_RYUK_DISABLED: true
       DOCKER_HOST: unix:///var/run/docker.sock
     steps:
       - name: Checkout repository
