@@ -1,15 +1,16 @@
 package com.example.booking.smoke;
 
 import com.example.booking.config.BaseTestContainerConfig;
+import com.example.booking.config.RedisTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("test")
-public class SmartBookingBackendApplicationSmokeTests extends BaseTestContainerConfig {
+@Import({RedisTestConfig.class})
+public class SmartBookingBackendApplicationSmokeTest extends BaseTestContainerConfig {
 
 	@Test
 	void contextLoads() {
