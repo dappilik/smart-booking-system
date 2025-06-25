@@ -12,6 +12,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
+import java.util.function.Supplier;
 
 @Testcontainers
 public abstract class BaseTestContainerConfig {
@@ -69,7 +70,8 @@ public abstract class BaseTestContainerConfig {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 
         registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
-        System.out.println("completed dynamic properties");
+        Supplier<Object> objectSupplier = () -> redis.getMappedPort(6379);
+        registry.add("spring.redis.port", objectSupplier);
+        System.out.println("completed dynamic properties: " + objectSupplier.get().toString());
     }
 }

@@ -26,9 +26,12 @@ public class BookingService {
     public Booking createBooking(BookingRequest request) {
         System.out.println("Received slot: " + request.getSlot());
         String slotKey = "slot:" + request.getSlot();
-
-        if (!slotAvailabilityService.isSlotAvailable(slotKey)) {
-            throw new IllegalStateException("Slot already booked");
+        try {
+            if (!slotAvailabilityService.isSlotAvailable(slotKey)) {
+                throw new IllegalStateException("Slot already booked");
+            }
+        } catch (Exception e) {
+            log.error("Error checking slot availability: {}", e.getMessage(), e);
         }
         Booking booking = Booking.builder()
                 .userEmail(request.getUserEmail())
@@ -38,7 +41,12 @@ public class BookingService {
                 .build();
 
         Booking saved = bookingRepository.save(booking);
-        slotAvailabilityService.markSlotAsBooked(slotKey);
+        try {
+            log.info("Booking saved: {}", objectMapper.writeValueAsString(saved));
+            slotAvailabilityService.markSlotAsBooked(slotKey);
+        } catch (JsonProcessingException e) {
+            log.error("Error while logging booking: {}", e.getMessage(), e);
+        }
 
         try {
             String eventJson = objectMapper.writeValueAsString(saved);
