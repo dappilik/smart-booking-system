@@ -1,5 +1,6 @@
-package com.example.booking.kafka;
+package com.example.booking.unit.kafka;
 
+import com.example.booking.kafka.BookingProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

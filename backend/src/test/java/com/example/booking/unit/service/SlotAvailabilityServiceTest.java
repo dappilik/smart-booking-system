@@ -1,5 +1,6 @@
-package com.example.booking.service;
+package com.example.booking.unit.service;
 
+import com.example.booking.service.SlotAvailabilityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

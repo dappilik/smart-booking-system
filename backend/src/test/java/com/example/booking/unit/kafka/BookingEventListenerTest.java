@@ -1,5 +1,6 @@
-package com.example.booking.kafka;
+package com.example.booking.unit.kafka;
 
+import com.example.booking.kafka.BookingEventListener;
 import com.example.booking.model.Booking;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
