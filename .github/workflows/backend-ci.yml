@@ -1,0 +1,39 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test-and-coverage:
+    runs-on: ubuntu-latest
+    name: 🧪 Run All Tests + Coverage
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Run All Tests (Unit + Integration + Smoke) with JaCoCo
+        run: |
+          cd backend
+          ./mvnw clean verify \
+            -Pcoverage \
+            -Dtest=*Test,*IT,*SmokeTest \
+            -Dsurefire.timeout=180 \
+            -DforkedProcessTimeoutInSeconds=180
+
+      - name: Upload JaCoCo report to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./backend/target/site/jacoco/jacoco.xml
+          flags: backend
+          name: codecov-backend
+          fail_ci_if_error: true

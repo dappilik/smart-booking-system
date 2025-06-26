@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:disabled
+    username: disabled
+    password: disabled
+    hikari:
+      max-lifetime: 10000  # 10s, must be less than PostgreSQL's idle timeout
+      idle-timeout: 5000
+      connection-timeout: 10000
+      minimum-idle: 1
+      maximum-pool-size: 5
+      validation-timeout: 5000
+      initialization-fail-timeout: 0
+  redis:
+    host: disabled
+    port: 0
+  kafka:
+    bootstrap-servers: disabled
+
+logging:
+  level:
+    org.springframework: WARN
+    com.example.booking: DEBUG
