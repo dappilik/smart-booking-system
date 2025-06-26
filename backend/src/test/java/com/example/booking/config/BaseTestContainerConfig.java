@@ -1,6 +1,5 @@
 package com.example.booking.config;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -25,7 +24,7 @@ public abstract class BaseTestContainerConfig {
             .withExposedPorts(6379)
             .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*\\n", 1))
             .withStartupTimeout(Duration.ofMinutes(2))
-            .withReuse(false);
+            .withReuse(true);
 
     @Container
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_IMAGE)
@@ -34,18 +33,16 @@ public abstract class BaseTestContainerConfig {
             .withPassword("test")
             .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 1))
             .withStartupTimeout(Duration.ofMinutes(2))
-            .withReuse(false);
+            .withReuse(true);
 
     @Container
     protected static final KafkaContainer kafka = new KafkaContainer(KAFKA_IMAGE)
             .waitingFor(Wait.forLogMessage(".*\\[KafkaServer id=\\d+\\] started.*", 1))
             .withStartupTimeout(Duration.ofMinutes(2))
-            .withReuse(false);
+            .withReuse(true);
 
 
-
-    @BeforeAll
-    static void startContainers() {
+    static {
         // Ensure containers are fully started before anything else
         redis.start();
         postgres.start();
@@ -67,6 +64,6 @@ public abstract class BaseTestContainerConfig {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 
         registry.add("spring.redis.host", redis::getHost);
-        registry.add("spring.redis.port",  () -> redis.getMappedPort(6379));
+        registry.add("spring.redis.port", () -> redis.getMappedPort(6379));
     }
 }

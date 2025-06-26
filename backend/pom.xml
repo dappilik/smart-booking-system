@@ -171,6 +171,14 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<excludes>
+						<exclude>**/config/**</exclude>
+						<exclude>**/model/**</exclude>
+						<exclude>**/repository/**</exclude>
+						<exclude>com/example/booking/SmartBookingBackendApplication.class</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
