@@ -54,7 +54,7 @@ class BookingControllerTest {
 
         ResponseEntity<Booking> response = bookingController.createBooking(request);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expected, response.getBody());
         verify(bookingService).createBooking(request);
     }
@@ -74,7 +74,7 @@ class BookingControllerTest {
 
         ResponseEntity<Booking> response = bookingController.getBooking(id);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expected, response.getBody());
         verify(bookingService).getBooking(id);
     }
@@ -88,13 +88,13 @@ class BookingControllerTest {
         if (email != null && !email.isEmpty()) {
             when(bookingService.getBookingsByEmail(email)).thenReturn(bookings);
             ResponseEntity<List<Booking>> response = bookingController.getBookings(email);
-            assertEquals(200, response.getStatusCodeValue());
+            assertEquals(200, response.getStatusCode().value());
             assertEquals(bookings, response.getBody());
             verify(bookingService).getBookingsByEmail(email);
         } else {
             when(bookingService.getBookings()).thenReturn(bookings);
             ResponseEntity<List<Booking>> response = bookingController.getBookings(email);
-            assertEquals(200, response.getStatusCodeValue());
+            assertEquals(200, response.getStatusCode().value());
             assertEquals(bookings, response.getBody());
             verify(bookingService).getBookings();
         }
