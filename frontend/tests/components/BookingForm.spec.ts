@@ -30,9 +30,7 @@ describe("BookingForm.vue", () => {
     (api.createBooking as any).mockResolvedValueOnce(bookingResponse);
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("test@example.com");
-    await wrapper
-      .find('input[type="datetime-local"]')
-      .setValue("2025-06-27T10:00");
+    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     expect(api.createBooking).toHaveBeenCalled();
@@ -49,9 +47,7 @@ describe("BookingForm.vue", () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("fail@example.com");
-    await wrapper
-      .find('input[type="datetime-local"]')
-      .setValue("2025-06-27T10:00");
+    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     expect(api.createBooking).toHaveBeenCalled();
@@ -72,9 +68,7 @@ describe("BookingForm.vue", () => {
     (api.createBooking as any).mockResolvedValueOnce(bookingResponse);
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("a@b.com");
-    await wrapper
-      .find('input[type="datetime-local"]')
-      .setValue("2025-06-27T10:00");
+    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     // formattedBookingTime is shown in the confirmation card
@@ -93,9 +87,7 @@ describe("BookingForm.vue", () => {
     });
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("a@b.com");
-    await wrapper
-      .find('input[type="datetime-local"]')
-      .setValue("2025-06-27T10:00");
+    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     expect(wrapper.vm.formattedBookingTime).toBe("");
