@@ -1,0 +1,7 @@
+coverage:
+  ignore:
+    - "src/main.ts"
+    - "src/router.ts"
+    - "src/types/*"
+    - "src/assets/*"
+    - "**/*.d.ts"
