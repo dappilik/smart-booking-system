@@ -2,6 +2,7 @@ name: 🚀 Backend CI
 
 on:
   push:
+    branches: [main] # Only run on push to main
     paths: ['backend/**', '.github/workflows/backend-ci.yml']
   pull_request:
     paths: ['backend/**', '.github/workflows/backend-ci.yml']
