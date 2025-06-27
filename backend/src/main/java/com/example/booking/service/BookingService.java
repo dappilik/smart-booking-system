@@ -33,12 +33,20 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
     }
 
-    public List<Booking> getBookingsByEmail(String email) {
-        return bookingRepository.findByUserEmail(email);
+    public List<Booking> getBookings(String email) {
+        if (email != null && !email.isEmpty()) {
+            return getBookingsByEmail(email);
+        } else {
+            return getBookings();
+        }
     }
 
-    public List<Booking> getBookings() {
+    private List<Booking> getBookings() {
         return bookingRepository.findAll();
+    }
+
+    private List<Booking> getBookingsByEmail(String email) {
+        return bookingRepository.findByUserEmail(email);
     }
 
     private String buildSlotKey(BookingRequest request) {
@@ -63,4 +71,3 @@ public class BookingService {
     }
 
 }
-

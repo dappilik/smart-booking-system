@@ -85,18 +85,10 @@ class BookingControllerTest {
     @DisplayName("Should get bookings with and without email param")
     void testGetBookings(String email) {
         List<Booking> bookings = List.of(booking());
-        if (email != null && !email.isEmpty()) {
-            when(bookingService.getBookingsByEmail(email)).thenReturn(bookings);
-            ResponseEntity<List<Booking>> response = bookingController.getBookings(email);
-            assertEquals(200, response.getStatusCode().value());
-            assertEquals(bookings, response.getBody());
-            verify(bookingService).getBookingsByEmail(email);
-        } else {
-            when(bookingService.getBookings()).thenReturn(bookings);
-            ResponseEntity<List<Booking>> response = bookingController.getBookings(email);
-            assertEquals(200, response.getStatusCode().value());
-            assertEquals(bookings, response.getBody());
-            verify(bookingService).getBookings();
-        }
+        when(bookingService.getBookings(email)).thenReturn(bookings);
+        ResponseEntity<List<Booking>> response = bookingController.getBookings(email);
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(bookings, response.getBody());
+        verify(bookingService).getBookings(email);
     }
 }
