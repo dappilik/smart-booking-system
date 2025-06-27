@@ -6,7 +6,16 @@
     <input v-model="form.userEmail" type="email" required />
 
     <label>Slot (ISO):</label>
-    <input v-model="form.slot" type="datetime-local" required />
+    <Datepicker
+      v-model="selectedDate"
+      :is-24="true"
+      :enable-time-picker="true"
+      :format="'yyyy-MM-dd HH:mm'"
+      :dark="theme === 'dark'"
+      required
+      input-class="datepicker-input"
+      placeholder="Select date and time"
+    />
 
     <button type="submit">Book Slot</button>
 
@@ -24,10 +33,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import type { BookingRequest, BookingResponse } from "../types/booking";
 import { createBooking } from "../api";
 import dayjs from "dayjs";
+import Datepicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+import { useTheme } from "../composables/useTheme";
+
+const { theme } = useTheme();
+
+const selectedDate = ref<Date | null>(null);
 
 const form = ref<BookingRequest>({
   userEmail: "",
@@ -36,9 +52,21 @@ const form = ref<BookingRequest>({
 
 const response = ref<BookingResponse | null>(null);
 
+// Keep form.slot in sync if editing an existing booking (optional, for edit mode)
+watch(
+  () => form.value.slot,
+  (val) => {
+    if (val) {
+      selectedDate.value = dayjs(val).toDate();
+    }
+  },
+  { immediate: true }
+);
+
 const submitBooking = async () => {
   try {
-    form.value.slot = dayjs(form.value.slot).format("YYYY-MM-DDTHH:mm:ss");
+    if (!selectedDate.value) throw new Error("Please select a date and time");
+    form.value.slot = dayjs(selectedDate.value).format("YYYY-MM-DDTHH:mm:ss");
     const res = await createBooking(form.value);
     response.value = res;
   } catch (err) {
@@ -73,7 +101,8 @@ const formattedBookingTime = computed(() => {
 }
 
 input,
-button {
+button,
+.datepicker-input {
   padding: 0.5rem;
   border-radius: 6px;
   border: none;
@@ -116,6 +145,20 @@ button:hover {
 .confirmation-card h3 {
   color: #22c55e;
 }
+
+.datepicker-input {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid #444;
+  width: 100%;
+}
+
+.datepicker-input:focus {
+  outline: 2px solid #0ea5e9;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
 @media (max-width: 480px) {
   .booking-form {
     width: 90%;

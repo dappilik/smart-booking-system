@@ -5,20 +5,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-
-const theme = ref<"light" | "dark">("dark");
-
-onMounted(() => {
-  const saved = localStorage.getItem("theme") as "light" | "dark";
-  theme.value = saved || "dark";
-  document.documentElement.setAttribute("data-theme", theme.value);
-});
+import { useTheme } from "../composables/useTheme";
+const { theme } = useTheme();
 
 function toggleTheme() {
   theme.value = theme.value === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", theme.value);
-  localStorage.setItem("theme", theme.value);
 }
 </script>
 

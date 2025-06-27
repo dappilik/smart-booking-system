@@ -56,7 +56,7 @@ class BookingServiceIT extends BaseTestContainerConfig {
     @Test
     @Order(3)
     void getBookingsByEmail() {
-        List<Booking> bookings = bookingService.getBookingsByEmail(TEST_EMAIL);
+        List<Booking> bookings = bookingService.getBookings(TEST_EMAIL);
         assertFalse(bookings.isEmpty());
         assertEquals(TEST_EMAIL, bookings.getFirst().getUserEmail());
     }
@@ -64,7 +64,7 @@ class BookingServiceIT extends BaseTestContainerConfig {
     @Test
     @Order(4)
     void getBookings() {
-        List<Booking> all = bookingService.getBookings();
+        List<Booking> all = bookingService.getBookings(null);
         assertFalse(all.isEmpty());
     }
 }

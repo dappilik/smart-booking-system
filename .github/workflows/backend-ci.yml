@@ -2,6 +2,7 @@ name: 🚀 Backend CI
 
 on:
   push:
+    branches: [main] # Only run on push to main
     paths: ['backend/**', '.github/workflows/backend-ci.yml']
   pull_request:
     paths: ['backend/**', '.github/workflows/backend-ci.yml']
@@ -29,6 +30,10 @@ jobs:
             -Dtest=*Test,*IT,*SmokeTest \
             -Dsurefire.timeout=180 \
             -DforkedProcessTimeoutInSeconds=180
+        working-directory: backend
+
+      - name: 📊 Print Backend Coverage Summary
+        run: ./mvnw jacoco:report
         working-directory: backend
 
       - name: 📈 Upload Coverage to Codecov

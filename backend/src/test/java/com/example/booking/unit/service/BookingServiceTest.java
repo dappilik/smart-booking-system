@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -101,20 +103,21 @@ class BookingServiceTest {
         Booking booking = Booking.builder().userEmail("test@example.com").build();
         given(bookingRepository.findByUserEmail("test@example.com")).willReturn(List.of(booking));
 
-        List<Booking> result = bookingService.getBookingsByEmail("test@example.com");
+        List<Booking> result = bookingService.getBookings("test@example.com");
 
         assertFalse(result.isEmpty());
         assertEquals("test@example.com", result.getFirst().getUserEmail());
         verify(bookingRepository).findByUserEmail("test@example.com");
     }
 
-    @Test
+    @ParameterizedTest
+    @NullAndEmptySource
     @DisplayName("Should return all bookings")
-    void testGetBookings() {
+    void testGetBookings(String email) {
         Booking booking = Booking.builder().userEmail("test@example.com").build();
         given(bookingRepository.findAll()).willReturn(List.of(booking));
 
-        List<Booking> result = bookingService.getBookings();
+        List<Booking> result = bookingService.getBookings(email);
 
         assertFalse(result.isEmpty());
         verify(bookingRepository).findAll();
