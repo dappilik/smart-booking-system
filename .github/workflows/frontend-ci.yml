@@ -22,3 +22,15 @@ jobs:
           cd frontend
           npm run lint
           npm run build
+      - name: Run Tests with Coverage
+        run: |
+          cd frontend
+          npm run coverage
+      - name: Upload Vitest coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: codecov-frontend
+          fail_ci_if_error: true
