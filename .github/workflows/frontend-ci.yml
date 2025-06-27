@@ -35,6 +35,19 @@ jobs:
         run: npm run coverage
         working-directory: frontend
 
+      - name: Convert frontend coverage to markdown
+        run: npx lcov-summary coverage/lcov.info > frontend-coverage.md
+        working-directory: frontend
+
+      - name: Post frontend coverage summary as PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: frontend/frontend-coverage.md
+
+      - name: 📊 Print Frontend Coverage Summary
+        run: cat coverage/lcov-report/index.html | grep -A 20 '<table class="coverage-summary"' || cat frontend/coverage/coverage-summary.txt
+        working-directory: frontend
+
       - name: 📈 Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
