@@ -1,37 +1,46 @@
-name: Frontend CI
+name: 🔧 Frontend CI
 
 on:
   push:
     paths:
       - 'frontend/**'
-      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
 
 jobs:
-  build:
+  frontend-tests:
+    name: 💻 Frontend Tests + Coverage
     runs-on: ubuntu-latest
-    name: 🌍 Build & Lint Frontend
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: ✅ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install dependencies
-        run: cd frontend && npm ci
+
+      - name: 🎨 Install Dependencies
+        run: npm ci
+        working-directory: frontend
+
       - name: Lint & Build
         run: |
-          cd frontend
           npm run lint
           npm run build
-      - name: Run Tests with Coverage
-        run: |
-          cd frontend
-          npm run coverage
-      - name: Upload Vitest coverage to Codecov
+        working-directory: frontend
+
+      - name: 🔢 Run Tests with Coverage
+        run: npm run coverage
+        working-directory: frontend
+
+      - name: 📈 Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./frontend/coverage/lcov.info
+          files: frontend/coverage/lcov.info
           flags: frontend
-          name: codecov-frontend
+          name: frontend-coverage
           fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}

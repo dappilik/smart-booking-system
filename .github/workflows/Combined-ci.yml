@@ -1,0 +1,53 @@
+name: 🥊 Combined Test Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-combined-coverage:
+    name: 🥊 Run All Tests + Merge Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 👷 Set up Java for backend
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 📊 Build and test backend
+        run: |
+          ./mvnw clean verify \
+          -Pcoverage \
+          -Dtest=*Test,*IT,*SmokeTest \
+          -Dsurefire.timeout=180 \
+          -DforkedProcessTimeoutInSeconds=180
+        working-directory: backend
+
+      - name: 🔧 Set up Node.js for frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🎨 Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: 🔢 Run frontend tests with coverage
+        run: npm run coverage
+        working-directory: frontend
+
+      - name: 📈 Upload combined coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: backend/target/site/jacoco/jacoco.xml,frontend/coverage/lcov.info
+          flags: backend,frontend
+          name: combined-report
+          fail_ci_if_error: true
+          verbose: true
