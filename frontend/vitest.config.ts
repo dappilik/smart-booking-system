@@ -8,5 +8,19 @@ export default defineConfig({
     globals: true,
     setupFiles: [],
     include: ["tests/**/*.spec.ts"],
+    coverage: {
+      provider: "v8",
+      exclude: [
+        "src/main.ts",
+        "src/router.ts",
+        "src/types/**",
+        "src/assets/**",
+        "dist/**",
+        "**/*.d.ts",
+        "**/*.config.ts",
+        "**/*.config.js",
+        "**/*.config.js",
+      ],
+    },
   },
 });

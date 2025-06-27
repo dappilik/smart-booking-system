@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import Home from "../src/views/Home.vue";
+import Home from "../../src/views/Home.vue";
 import { describe, it, expect } from "vitest";
 
 describe("Home.vue", () => {
