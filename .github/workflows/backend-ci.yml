@@ -32,19 +32,6 @@ jobs:
             -DforkedProcessTimeoutInSeconds=180
         working-directory: backend
 
-      - name: Generate JaCoCo badge and markdown
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          jacoco-csv-file: backend/target/site/jacoco/jacoco.csv
-          generate-summary: true
-          summary-filename: backend/backend-coverage.md
-          fail-if-coverage-less-than: 0
-
-      - name: Post backend coverage summary as PR comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          path: backend/backend-coverage.md
-
       - name: 📊 Print Backend Coverage Summary
         run: ./mvnw jacoco:report
         working-directory: backend
