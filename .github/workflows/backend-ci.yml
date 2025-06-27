@@ -31,9 +31,14 @@ jobs:
             -DforkedProcessTimeoutInSeconds=180
         working-directory: backend
 
-      - name: Convert backend coverage to markdown
-        run: npx jacoco-badge-generator --input target/site/jacoco/jacoco.xml --output backend-coverage.md
-        working-directory: backend
+      - name: Generate JaCoCo badge and markdown
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: backend/target/site/jacoco/jacoco.csv
+          jacoco-xml-file: backend/target/site/jacoco/jacoco.xml
+          generate-coverage-markdown: true
+          coverage-markdown-filename: backend-coverage.md
+          fail-if-coverage-less-than: 0
 
       - name: Post backend coverage summary as PR comment
         uses: marocchino/sticky-pull-request-comment@v2
