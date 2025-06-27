@@ -2,10 +2,10 @@
 
 A full-stack system for real-time service bookings with support for asynchronous workflows, fault tolerance, and test automation. Built using modern technologies like Java, Spring Boot, React, Kafka, and Redis.
 
-[![Backend Coverage](https://codecov.io/gh/<your-org>/smart-booking-system/branch/main/graph/badge.svg?flag=backend)](https://codecov.io/gh/<your-org>/smart-booking-system)
-[![Frontend Coverage](https://codecov.io/gh/<your-org>/smart-booking-system/branch/main/graph/badge.svg?flag=frontend)](https://codecov.io/gh/<your-org>/smart-booking-system)
-[![CI Status](https://github.com/<your-org>/smart-booking-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/<your-org>/smart-booking-system/actions/workflows/backend-ci.yml)
-[![CI Status](https://github.com/<your-org>/smart-booking-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/<your-org>/smart-booking-system/actions/workflows/frontend-ci.yml)
+[![Backend Coverage](https://codecov.io/gh/dappilik/smart-booking-system/branch/main/graph/badge.svg?flag=backend)](https://codecov.io/gh/dappilik/smart-booking-system)
+[![Frontend Coverage](https://codecov.io/gh/dappilik/smart-booking-system/branch/main/graph/badge.svg?flag=frontend)](https://codecov.io/gh/dappilik/smart-booking-system)
+[![CI Status](https://github.com/dappilik/smart-booking-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/dappilik/smart-booking-system/actions/workflows/backend-ci.yml)
+[![CI Status](https://github.com/dappilik/smart-booking-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/dappilik/smart-booking-system/actions/workflows/frontend-ci.yml)
 
 ---
 
