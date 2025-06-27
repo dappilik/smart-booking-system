@@ -5,7 +5,7 @@ import router from "./router";
 
 createApp(App).use(router).mount("#app");
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const defaultTitle = "Smart Booking System";
   document.title = (to.meta.title as string) || defaultTitle;
   next();
