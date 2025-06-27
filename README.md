@@ -51,6 +51,8 @@ npm install
 npm run dev
 ```
 
+[![codecov](https://codecov.io/gh/dappilik/dappilik/branch/main/graph/badge.svg)](https://codecov.io/gh/dappilik/smart-booking-system)
+
 # 📐 Architecture Diagram (Planned)
 User → React App → Spring Boot API → DB/Redis
                         ↓
