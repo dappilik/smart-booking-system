@@ -1,5 +1,6 @@
 package com.example.booking.unit.service;
 
+import com.example.booking.exception.SlotAlreadyBookedException;
 import com.example.booking.model.Booking;
 import com.example.booking.model.BookingRequest;
 import com.example.booking.repository.BookingRepository;
@@ -78,7 +79,7 @@ class BookingServiceTest {
         given(slotAvailabilityService.isSlotAvailable(anyString())).willReturn(Mono.just(false));
 
         StepVerifier.create(bookingService.createBooking(request))
-                .expectError(IllegalStateException.class)
+                .expectError(SlotAlreadyBookedException.class)
                 .verify();
     }
 
