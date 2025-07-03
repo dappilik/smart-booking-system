@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+@SpringBootTest(classes = com.example.booking.SmartBookingBackendApplication.class)
 @Import({RedisTestConfig.class})
 public class SmartBookingBackendApplicationSmokeTest extends BaseTestContainerConfig {
 
