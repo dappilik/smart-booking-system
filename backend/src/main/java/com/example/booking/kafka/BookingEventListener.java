@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -14,11 +17,15 @@ public class BookingEventListener {
 
     private final ObjectMapper objectMapper;
 
+    // For test verification: store received events
+    public static final List<Booking> receivedEvents = new CopyOnWriteArrayList<>();
+
     @KafkaListener(topics = "booking-events", groupId = "booking-consumer-group", containerFactory = "kafkaListenerFactory")
     public void consume(String message) {
         try {
             Booking booking = objectMapper.readValue(message, Booking.class);
-            log.info("📥 Received booking event: {}", booking);
+            log.info("\uD83D\uDCE5 Received booking event: {}", booking);
+            receivedEvents.add(booking); // Add to test event collector
 
             // Example: simulate sending email
             log.info("📧 Sending email to {}", booking.getUserEmail());
