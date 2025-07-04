@@ -3,6 +3,7 @@ package com.example.booking.integration;
 import com.example.booking.config.BaseTestContainerConfig;
 import com.example.booking.config.RedisTestConfig;
 import com.example.booking.kafka.BookingEventListener;
+import com.example.booking.model.Booking;
 import com.example.booking.model.BookingRequest;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Order;
@@ -18,10 +19,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -109,5 +112,27 @@ class BookingIT extends BaseTestContainerConfig {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].userEmail").exists();
+    }
+
+    @Test
+    @Order(4)
+    void getBookingsStream() {
+        var result = webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(BASE_URL).queryParam("email", TEST_EMAIL).queryParam("stream", true).build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .returnResult(com.example.booking.model.Booking.class);
+
+        List<Booking> bookings = new java.util.concurrent.CopyOnWriteArrayList<>();
+        result.getResponseBody().subscribe(bookings::add);
+
+        // Await until at least one Booking with the expected userEmail is present
+        await().atMost(java.time.Duration.ofSeconds(5)).untilAsserted(() -> {
+            assertTrue(!bookings.isEmpty(), "Expected at least one booking in the stream");
+            boolean found = bookings.stream().anyMatch(b -> TEST_EMAIL.equals(b.getUserEmail()));
+            assertTrue(found, "Expected at least one Booking with userEmail=" + TEST_EMAIL);
+        });
     }
 }

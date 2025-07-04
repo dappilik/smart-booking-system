@@ -29,8 +29,16 @@ public class BookingController {
         return bookingService.getBooking(id);
     }
 
-    @GetMapping()
-    public Flux<Booking> getBookings(@RequestParam(required = false) String email) {
-        return bookingService.getBookings(email);
+    @GetMapping(produces = {"application/json", "text/event-stream"})
+    public Flux<Booking> getBookings(@RequestParam(required = false) String email,
+                                     @RequestParam(required = false, defaultValue = "false") boolean stream) {
+        Flux<Booking> bookings = bookingService.getBookings(email);
+        log.info("Fetching bookings for email: {}, stream: {}", email, stream);
+        if (stream) {
+            // Add delay to simulate streaming
+            return bookings.delayElements(java.time.Duration.ofSeconds(1));
+        } else {
+            return bookings.collectList().flatMapMany(Flux::fromIterable);
+        }
     }
 }

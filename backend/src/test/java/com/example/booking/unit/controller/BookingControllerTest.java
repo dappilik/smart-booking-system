@@ -5,6 +5,7 @@ import com.example.booking.model.Booking;
 import com.example.booking.model.BookingRequest;
 import com.example.booking.service.BookingService;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -86,11 +87,23 @@ class BookingControllerTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"user@example.com"})
-    @DisplayName("Should get bookings with and without email param")
-    void testGetBookings(String email) {
+    @DisplayName("Should get bookings with and without email param (non-stream)")
+    void testGetBookings_NonStream(String email) {
         Booking booking = booking();
         given(bookingService.getBookings(email)).willReturn(Flux.just(booking));
-        StepVerifier.create(bookingController.getBookings(email))
+        StepVerifier.create(bookingController.getBookings(email, false))
+                .expectNext(booking)
+                .verifyComplete();
+        verify(bookingService).getBookings(email);
+    }
+
+    @Test
+    @DisplayName("Should get bookings as stream (stream=true)")
+    void testGetBookings_Stream() {
+        String email = "user@example.com";
+        Booking booking = booking();
+        given(bookingService.getBookings(email)).willReturn(Flux.just(booking));
+        StepVerifier.create(bookingController.getBookings(email, true))
                 .expectNext(booking)
                 .verifyComplete();
         verify(bookingService).getBookings(email);

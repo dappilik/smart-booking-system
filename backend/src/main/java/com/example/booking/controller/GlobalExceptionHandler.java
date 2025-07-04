@@ -30,10 +30,13 @@ public class GlobalExceptionHandler {
             case ServerWebInputException swe -> {
                 error.put("status", HttpStatus.BAD_REQUEST.value());
                 error.put("error", "Bad Request");
-                String msg = swe.getMostSpecificCause().getMessage();
-                if (msg != null && (msg.contains("Unexpected character") || msg.contains("was expecting"))) {
+                Throwable mostSpecificCause = swe.getMostSpecificCause();
+                String msg = mostSpecificCause != null ? mostSpecificCause.getMessage() : null;
+                if (msg == null) {
+                    error.put("message", null);
+                } else if (msg.contains("Unexpected character") || msg.contains("was expecting")) {
                     error.put("message", "Malformed JSON request body");
-                } else if (msg != null && msg.contains("Text '") && msg.contains("' could not be parsed")) {
+                } else if (msg.contains("Text '") && msg.contains("' could not be parsed")) {
                     int start = msg.indexOf("Text '") + 6;
                     int end = msg.indexOf("' could not be parsed");
                     if (start > 5 && end > start) {
