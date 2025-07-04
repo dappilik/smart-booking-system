@@ -5,6 +5,7 @@ import com.example.booking.exception.SlotAlreadyBookedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
 
@@ -21,11 +22,13 @@ class GlobalExceptionHandlerTest {
     void handleBadRequest_withWebExchangeBindException() {
         WebExchangeBindException ex = mock(WebExchangeBindException.class);
         when(ex.getFieldErrors()).thenReturn(java.util.List.of());
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
-        assertEquals("Validation failed", response.getBody().get("message"));
+        assertNull(response.getBody().get("message"));
     }
 
     @Test
@@ -33,9 +36,11 @@ class GlobalExceptionHandlerTest {
         Throwable cause = new RuntimeException("Unexpected character");
         ServerWebInputException ex = mock(ServerWebInputException.class);
         when(ex.getMostSpecificCause()).thenReturn(cause);
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Malformed JSON request body", response.getBody().get("message"));
+        assertNotNull(response.getBody());
+        assertEquals("Unexpected character", response.getBody().get("message"));
     }
 
     @Test
@@ -44,10 +49,12 @@ class GlobalExceptionHandlerTest {
         Throwable cause = new RuntimeException(msg);
         ServerWebInputException ex = mock(ServerWebInputException.class);
         when(ex.getMostSpecificCause()).thenReturn(cause);
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().get("message").toString().contains("could not be parsed"));
-        assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("slot"));
+        assertNotNull(response.getBody());
+        assertEquals(msg, response.getBody().get("message"));
+        assertFalse(response.getBody().containsKey("fieldErrors"));
     }
 
     @Test
@@ -55,6 +62,7 @@ class GlobalExceptionHandlerTest {
         SlotAlreadyBookedException ex = new SlotAlreadyBookedException("Slot already booked");
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(409, response.getBody().get("status"));
         assertEquals("Conflict", response.getBody().get("error"));
         assertEquals("Slot already booked", response.getBody().get("message"));
@@ -65,6 +73,7 @@ class GlobalExceptionHandlerTest {
         Exception ex = new Exception("Some error");
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
         assertEquals("Some error", response.getBody().get("message"));
@@ -76,11 +85,13 @@ class GlobalExceptionHandlerTest {
         org.springframework.validation.FieldError fieldError1 = new org.springframework.validation.FieldError("object", "field1", "must not be null");
         org.springframework.validation.FieldError fieldError2 = new org.springframework.validation.FieldError("object", "field2", "must be a date");
         when(ex.getFieldErrors()).thenReturn(java.util.List.of(fieldError1, fieldError2));
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
-        assertEquals("Validation failed", response.getBody().get("message"));
+        assertNull(response.getBody().get("message"));
         assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("field1"));
         assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("field2"));
     }
@@ -90,8 +101,10 @@ class GlobalExceptionHandlerTest {
         Throwable cause = new RuntimeException("Some other error");
         ServerWebInputException ex = mock(ServerWebInputException.class);
         when(ex.getMostSpecificCause()).thenReturn(cause);
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("Some other error", response.getBody().get("message"));
     }
 
@@ -99,8 +112,10 @@ class GlobalExceptionHandlerTest {
     void handleBadRequest_withNullMessage() {
         ServerWebInputException ex = mock(ServerWebInputException.class);
         when(ex.getMostSpecificCause()).thenReturn(null);
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertNull(response.getBody().get("message"));
     }
 
@@ -109,6 +124,7 @@ class GlobalExceptionHandlerTest {
         SlotAlreadyBookedException ex = new SlotAlreadyBookedException(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(409, response.getBody().get("status"));
         assertEquals("Conflict", response.getBody().get("error"));
         assertNull(response.getBody().get("message"));
@@ -119,6 +135,7 @@ class GlobalExceptionHandlerTest {
         Exception ex = new Exception((String) null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
         assertNull(response.getBody().get("message"));
@@ -128,19 +145,23 @@ class GlobalExceptionHandlerTest {
     void handleBadRequest_withFieldErrorsEmpty() {
         WebExchangeBindException ex = mock(WebExchangeBindException.class);
         when(ex.getFieldErrors()).thenReturn(java.util.Collections.emptyList());
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertFalse(response.getBody().containsKey("fieldErrors"));
     }
 
     @Test
     void handleBadRequest_withWebExchangeBindException_fieldErrorNullMessage() {
         WebExchangeBindException ex = mock(WebExchangeBindException.class);
-        org.springframework.validation.FieldError fieldError = new org.springframework.validation.FieldError("object", "field1", null);
+        FieldError fieldError = new FieldError("object", "field1", null);
         when(ex.getFieldErrors()).thenReturn(java.util.List.of(fieldError));
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Validation failed", response.getBody().get("message"));
+        assertNotNull(response.getBody());
+        assertNull(response.getBody().get("message"));
         assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("field1"));
         assertNull(((Map<?, ?>)response.getBody().get("fieldErrors")).get("field1"));
     }
@@ -151,8 +172,10 @@ class GlobalExceptionHandlerTest {
         Throwable cause = new RuntimeException(msg);
         ServerWebInputException ex = mock(ServerWebInputException.class);
         when(ex.getMostSpecificCause()).thenReturn(cause);
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(msg, response.getBody().get("message"));
         assertFalse(response.getBody().containsKey("fieldErrors"));
     }
@@ -162,9 +185,11 @@ class GlobalExceptionHandlerTest {
         Throwable cause = new RuntimeException("was expecting double-quote to start field name");
         ServerWebInputException ex = mock(ServerWebInputException.class);
         when(ex.getMostSpecificCause()).thenReturn(cause);
+        when(ex.getMessage()).thenReturn(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Malformed JSON request body", response.getBody().get("message"));
+        assertNotNull(response.getBody());
+        assertEquals("was expecting double-quote to start field name", response.getBody().get("message"));
     }
 
     @Test
@@ -172,6 +197,7 @@ class GlobalExceptionHandlerTest {
         SlotAlreadyBookedException ex = new SlotAlreadyBookedException("");
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("", response.getBody().get("message"));
     }
 
@@ -180,32 +206,31 @@ class GlobalExceptionHandlerTest {
         Exception ex = new Exception("");
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("", response.getBody().get("message"));
     }
 
     @Test
     void handleBadRequest_withOtherException_nullAndEmptyFieldErrors() {
-        // Simulate a case where fieldErrors is empty and message is null
         Exception ex = new Exception((String) null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
         assertNull(response.getBody().get("message"));
-        // fieldErrors should not be present
         assertFalse(response.getBody().containsKey("fieldErrors"));
     }
 
     @Test
     void handleBadRequest_withSlotAlreadyBookedException_nullAndEmptyFieldErrors() {
-        // Simulate a case where fieldErrors is empty and message is null
         SlotAlreadyBookedException ex = new SlotAlreadyBookedException(null);
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(409, response.getBody().get("status"));
         assertEquals("Conflict", response.getBody().get("error"));
         assertNull(response.getBody().get("message"));
-        // fieldErrors should not be present
         assertFalse(response.getBody().containsKey("fieldErrors"));
     }
 }

@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
             case WebExchangeBindException bindException -> {
                 error.put("status", HttpStatus.BAD_REQUEST.value());
                 error.put("error", "Bad Request");
-                error.put("message", "Validation failed");
+                error.put("message", bindException.getMessage());
                 bindException.getFieldErrors().forEach(fieldError ->
                         fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage())
                 );
@@ -30,28 +30,12 @@ public class GlobalExceptionHandler {
             case ServerWebInputException swe -> {
                 error.put("status", HttpStatus.BAD_REQUEST.value());
                 error.put("error", "Bad Request");
-                Throwable mostSpecificCause = swe.getMostSpecificCause();
-                String msg = mostSpecificCause != null ? mostSpecificCause.getMessage() : null;
-                if (msg == null) {
-                    error.put("message", null);
-                } else if (msg.contains("Unexpected character") || msg.contains("was expecting")) {
-                    error.put("message", "Malformed JSON request body");
-                } else if (msg.contains("Text '") && msg.contains("' could not be parsed")) {
-                    int start = msg.indexOf("Text '") + 6;
-                    int end = msg.indexOf("' could not be parsed");
-                    if (start > 5 && end > start) {
-                        String invalidValue = msg.substring(start, end);
-                        fieldErrors.put("slot", String.format("Invalid value '%s', must match format yyyy-MM-dd'T'HH:mm:ss", invalidValue));
-                    }
-                    error.put("message", msg);
-                } else {
-                    error.put("message", msg);
-                }
+                error.put("message", swe.getMostSpecificCause().getMessage());
             }
             case SlotAlreadyBookedException slotAlreadyBookedException -> {
                 error.put("status", HttpStatus.CONFLICT.value());
                 error.put("error", "Conflict");
-                error.put("message", ex.getMessage());
+                error.put("message", slotAlreadyBookedException.getMessage());
             }
             default -> {
                 error.put("status", HttpStatus.BAD_REQUEST.value());
@@ -59,10 +43,9 @@ public class GlobalExceptionHandler {
                 error.put("message", ex.getMessage());
             }
         }
-        if(!fieldErrors.isEmpty()){
+        if (!fieldErrors.isEmpty()) {
             error.put("fieldErrors", fieldErrors);
         }
-
         return new ResponseEntity<>(error, error.get("status").equals(HttpStatus.CONFLICT.value()) ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST);
     }
 }
