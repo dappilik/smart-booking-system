@@ -48,7 +48,12 @@ public abstract class BaseTestContainerConfig {
         postgres.start();
         kafka.start();
 
-        System.out.println("✅ PostgreSQL: " + postgres.getJdbcUrl());
+        System.out.println("✅ PostgreSQL: " + String.format(
+                "r2dbc:postgresql://%s:%d/%s",
+                postgres.getHost(),
+                postgres.getMappedPort(5432),
+                postgres.getDatabaseName()
+        ));
         System.out.println("✅ Redis: " + redis.getHost() + ":" + redis.getMappedPort(6379));
         System.out.println("✅ Kafka: " + kafka.getBootstrapServers());
     }
@@ -56,10 +61,14 @@ public abstract class BaseTestContainerConfig {
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
         System.out.println("setting dynamic properties");
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.datasource.driver-class-name", postgres::getDriverClassName);
+        registry.add("spring.r2dbc.url", () -> String.format(
+            "r2dbc:postgresql://%s:%d/%s",
+            postgres.getHost(),
+            postgres.getMappedPort(5432),
+            postgres.getDatabaseName()
+        ));
+        registry.add("spring.r2dbc.username", postgres::getUsername);
+        registry.add("spring.r2dbc.password", postgres::getPassword);
 
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
 

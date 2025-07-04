@@ -1,15 +1,16 @@
 package com.example.booking.service;
 
+import com.example.booking.exception.SlotAlreadyBookedException;
 import com.example.booking.model.Booking;
 import com.example.booking.model.BookingRequest;
 import com.example.booking.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,20 +21,29 @@ public class BookingService {
     private final SlotAvailabilityService slotAvailabilityService;
     private final EventsService eventsService;
 
-    public Booking createBooking(BookingRequest request) {
-        return Optional.of(request)
-                .map(this::buildSlotKey)
-                .filter(slotAvailabilityService::isSlotAvailable)
-                .map(slotKey -> bookSlot(request, slotKey))
-                .orElseThrow(() -> new IllegalStateException("Slot already booked"));
+    public Mono<Booking> createBooking(BookingRequest request) {
+        String slotKey = buildSlotKey(request);
+        return slotAvailabilityService.isSlotAvailable(slotKey)
+                .flatMap(isAvailable -> {
+                    if (isAvailable) {
+                        Booking booking = buildBooking(request);
+                        return bookingRepository.save(booking)
+                                .doOnSuccess(savedBooking -> {
+                                    slotAvailabilityService.markSlotAsBooked(slotKey).subscribe();
+                                    eventsService.sendBookingEvent(savedBooking).subscribe();
+                                });
+                    } else {
+                        return Mono.error(new SlotAlreadyBookedException("Slot already booked"));
+                    }
+                });
     }
 
-    public Booking getBooking(Long id) {
+    public Mono<Booking> getBooking(Long id) {
         return bookingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Booking not found")));
     }
 
-    public List<Booking> getBookings(String email) {
+    public Flux<Booking> getBookings(String email) {
         if (email != null && !email.isEmpty()) {
             return getBookingsByEmail(email);
         } else {
@@ -41,24 +51,16 @@ public class BookingService {
         }
     }
 
-    private List<Booking> getBookings() {
+    private Flux<Booking> getBookings() {
         return bookingRepository.findAll();
     }
 
-    private List<Booking> getBookingsByEmail(String email) {
+    private Flux<Booking> getBookingsByEmail(String email) {
         return bookingRepository.findByUserEmail(email);
     }
 
     private String buildSlotKey(BookingRequest request) {
         return "slot:" + request.getSlot();
-    }
-
-    private Booking bookSlot(BookingRequest request, String slotKey) {
-        Booking booking = buildBooking(request);
-        Booking savedBooking = bookingRepository.save(booking);
-        slotAvailabilityService.markSlotAsBooked(slotKey);
-        eventsService.sendBookingEvent(savedBooking);
-        return savedBooking;
     }
 
     private Booking buildBooking(BookingRequest request) {

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.test.StepVerifier;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -40,7 +41,8 @@ class EventsServiceTest {
         String json = "{\"id\":1}";
         when(objectMapper.writeValueAsString(booking)).thenReturn(json);
 
-        eventsService.sendBookingEvent(booking);
+        StepVerifier.create(eventsService.sendBookingEvent(booking))
+                .verifyComplete();
 
         verify(objectMapper).writeValueAsString(booking);
         verify(bookingProducer).sendBookingEvent(json);
@@ -52,11 +54,12 @@ class EventsServiceTest {
         when(objectMapper.writeValueAsString(booking)).thenThrow(new JsonProcessingException("error") {
         });
 
-        eventsService.sendBookingEvent(booking);
+        StepVerifier.create(eventsService.sendBookingEvent(booking))
+                .expectError(RuntimeException.class)
+                .verify();
 
         verify(objectMapper).writeValueAsString(booking);
         verify(bookingProducer, never()).sendBookingEvent(anyString());
         // Optionally verify logging if log is injected
     }
 }
-

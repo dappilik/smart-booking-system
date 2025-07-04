@@ -5,25 +5,10 @@ spring:
   application:
     name: smart-booking-system
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/bookingdb
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/bookingdb
     username: booking_user
     password: booking_pass
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      initialization-fail-timeout: 0
-      maximum-pool-size: 5
-      connection-timeout: 30000
-      idle-timeout: 10000
-      max-lifetime: 20000
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
 
   redis:
     host: localhost
@@ -39,6 +24,11 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
 
 logging:
   level:

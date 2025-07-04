@@ -5,21 +5,26 @@ import com.example.booking.model.Booking;
 import com.example.booking.model.BookingRequest;
 import com.example.booking.service.BookingService;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.*;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BookingControllerTest {
@@ -46,22 +51,23 @@ class BookingControllerTest {
                 .build();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("provideBookingRequests")
     @DisplayName("Should create booking for valid requests")
-    void testCreateBooking(BookingRequest request, Booking expected) {
-        when(bookingService.createBooking(request)).thenReturn(expected);
+    void testCreateBooking(@SuppressWarnings("unused") String scenario, BookingRequest request, Booking expected) {
+        // Arrange
+        given(bookingService.createBooking(request)).willReturn(Mono.just(expected));
 
-        ResponseEntity<Booking> response = bookingController.createBooking(request);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(expected, response.getBody());
+        // Act & Assert
+        StepVerifier.create(bookingController.createBooking(request))
+                .expectNext(expected)
+                .verifyComplete();
         verify(bookingService).createBooking(request);
     }
 
     static Stream<Arguments> provideBookingRequests() {
         return Stream.of(
-                Arguments.of(bookingRequest(), booking())
+                Arguments.of("basic valid booking", bookingRequest(), booking())
         );
     }
 
@@ -70,25 +76,36 @@ class BookingControllerTest {
     @DisplayName("Should get booking by id")
     void testGetBooking(Long id) {
         Booking expected = booking();
-        when(bookingService.getBooking(id)).thenReturn(expected);
+        given(bookingService.getBooking(id)).willReturn(Mono.just(expected));
 
-        ResponseEntity<Booking> response = bookingController.getBooking(id);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(expected, response.getBody());
+        StepVerifier.create(bookingController.getBooking(id))
+                .expectNext(expected)
+                .verifyComplete();
         verify(bookingService).getBooking(id);
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"user@example.com"})
-    @DisplayName("Should get bookings with and without email param")
-    void testGetBookings(String email) {
-        List<Booking> bookings = List.of(booking());
-        when(bookingService.getBookings(email)).thenReturn(bookings);
-        ResponseEntity<List<Booking>> response = bookingController.getBookings(email);
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(bookings, response.getBody());
+    @DisplayName("Should get bookings with and without email param (non-stream)")
+    void testGetBookings_NonStream(String email) {
+        Booking booking = booking();
+        given(bookingService.getBookings(email)).willReturn(Flux.just(booking));
+        StepVerifier.create(bookingController.getBookings(email, false))
+                .expectNext(booking)
+                .verifyComplete();
+        verify(bookingService).getBookings(email);
+    }
+
+    @Test
+    @DisplayName("Should get bookings as stream (stream=true)")
+    void testGetBookings_Stream() {
+        String email = "user@example.com";
+        Booking booking = booking();
+        given(bookingService.getBookings(email)).willReturn(Flux.just(booking));
+        StepVerifier.create(bookingController.getBookings(email, true))
+                .expectNext(booking)
+                .verifyComplete();
         verify(bookingService).getBookings(email);
     }
 }

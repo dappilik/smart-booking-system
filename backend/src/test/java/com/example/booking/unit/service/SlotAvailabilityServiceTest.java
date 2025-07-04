@@ -9,9 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,31 +37,39 @@ class SlotAvailabilityServiceTest {
     @Test
     void testIsSlotAvailable_WhenSlotIsAvailable() {
         when(valueOperations.get("slot1")).thenReturn("available");
-        assertTrue(slotAvailabilityService.isSlotAvailable("slot1"));
+        StepVerifier.create(slotAvailabilityService.isSlotAvailable("slot1"))
+                .expectNext(true)
+                .verifyComplete();
     }
 
     @Test
     void testIsSlotAvailable_WhenSlotIsNull() {
         when(valueOperations.get("slot2")).thenReturn(null);
-        assertTrue(slotAvailabilityService.isSlotAvailable("slot2"));
+        StepVerifier.create(slotAvailabilityService.isSlotAvailable("slot2"))
+                .expectNext(true)
+                .verifyComplete();
     }
 
     @Test
     void testIsSlotAvailable_WhenSlotIsBooked() {
         when(valueOperations.get("slot3")).thenReturn("booked");
-        assertFalse(slotAvailabilityService.isSlotAvailable("slot3"));
+        StepVerifier.create(slotAvailabilityService.isSlotAvailable("slot3"))
+                .expectNext(false)
+                .verifyComplete();
     }
 
     @Test
     void testIsSlotAvailable_WhenSlotIsAvailableCaseInsensitive() {
         when(valueOperations.get("slot4")).thenReturn("AVAILABLE");
-        assertTrue(slotAvailabilityService.isSlotAvailable("slot4"));
+        StepVerifier.create(slotAvailabilityService.isSlotAvailable("slot4"))
+                .expectNext(true)
+                .verifyComplete();
     }
 
     @Test
     void testMarkSlotAsBooked() {
-        slotAvailabilityService.markSlotAsBooked("slot5");
+        StepVerifier.create(slotAvailabilityService.markSlotAsBooked("slot5"))
+                .verifyComplete();
         verify(valueOperations, times(1)).set("slot5", "booked");
     }
 }
-

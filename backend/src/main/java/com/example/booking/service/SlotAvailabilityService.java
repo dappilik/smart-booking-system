@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -12,12 +13,14 @@ public class SlotAvailabilityService {
 
     private final StringRedisTemplate redisTemplate;
 
-    public boolean isSlotAvailable(String slotKey) {
-        String value = redisTemplate.opsForValue().get(slotKey);
-        return value == null || value.equalsIgnoreCase("available");
+    public Mono<Boolean> isSlotAvailable(String slotKey) {
+        return Mono.fromCallable(() -> {
+            String value = redisTemplate.opsForValue().get(slotKey);
+            return value == null || value.equalsIgnoreCase("available");
+        });
     }
 
-    public void markSlotAsBooked(String slotKey) {
-        redisTemplate.opsForValue().set(slotKey, "booked");
+    public Mono<Void> markSlotAsBooked(String slotKey) {
+        return Mono.fromRunnable(() -> redisTemplate.opsForValue().set(slotKey, "booked"));
     }
 }
