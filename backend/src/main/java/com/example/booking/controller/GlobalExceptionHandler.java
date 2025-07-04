@@ -14,6 +14,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @SuppressWarnings("ConstantConditions")
     @ExceptionHandler({ServerWebInputException.class, WebExchangeBindException.class, SlotAlreadyBookedException.class})
     public ResponseEntity<Map<String, Object>> handleBadRequest(Exception ex) {
         Map<String, Object> error = new HashMap<>();
@@ -30,7 +31,8 @@ public class GlobalExceptionHandler {
             case ServerWebInputException swe -> {
                 error.put("status", HttpStatus.BAD_REQUEST.value());
                 error.put("error", "Bad Request");
-                error.put("message", swe.getMostSpecificCause().getMessage());
+                if (swe.getMostSpecificCause() != null)
+                    error.put("message", swe.getMostSpecificCause().getMessage());
             }
             case SlotAlreadyBookedException slotAlreadyBookedException -> {
                 error.put("status", HttpStatus.CONFLICT.value());
