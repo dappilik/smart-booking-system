@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
             case WebExchangeBindException bindException -> {
                 error.put("status", HttpStatus.BAD_REQUEST.value());
                 error.put("error", "Bad Request");
-                error.put("message", bindException.getMessage());
+                error.put("message", "Validation failed");
                 bindException.getFieldErrors().forEach(fieldError ->
                         fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage())
                 );

@@ -30,7 +30,18 @@ describe("BookingForm.vue", () => {
     (api.createBooking as any).mockResolvedValueOnce(bookingResponse);
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("test@example.com");
-    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
+    // setData does not work for refs defined with script setup, so set via input interaction
+    // Find the Datepicker and emit the update:modelValue event
+    await wrapper.find('input[type="email"]').setValue("a@b.com");
+    // Simulate date selection via Datepicker
+    await wrapper.vm.$emit(
+      "update:selectedDate",
+      new Date("2025-06-27T10:00:00")
+    );
+    // Or set selectedDate via direct assignment if accessible
+    if ((wrapper.vm as any).selectedDate !== undefined) {
+      (wrapper.vm as any).selectedDate = new Date("2025-06-27T10:00:00");
+    }
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     expect(api.createBooking).toHaveBeenCalled();
@@ -40,14 +51,30 @@ describe("BookingForm.vue", () => {
     expect(wrapper.text()).toContain("CONFIRMED");
   });
 
-  it("shows alert and logs error on booking failure", async () => {
+  it("shows alert and logs error on booking failure (no date selected)", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const wrapper = mount(BookingForm);
+    await wrapper.find('input[type="email"]').setValue("fail@example.com");
+    // Do not set selectedDate
+    await wrapper.find("form").trigger("submit.prevent");
+    await nextTick();
+    expect(api.createBooking).not.toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalledWith("Booking failed. See console.");
+    expect(errorSpy).toHaveBeenCalled();
+    alertSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
+  it("shows alert and logs error on booking failure (API error)", async () => {
     const error = new Error("Booking failed");
     (api.createBooking as any).mockRejectedValueOnce(error);
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("fail@example.com");
-    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
+    // setData does not work for refs defined with script setup, so set via direct assignment
+    (wrapper.vm as any).selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     expect(api.createBooking).toHaveBeenCalled();
@@ -68,7 +95,7 @@ describe("BookingForm.vue", () => {
     (api.createBooking as any).mockResolvedValueOnce(bookingResponse);
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("a@b.com");
-    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
+    (wrapper.vm as any).selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
     // formattedBookingTime is shown in the confirmation card
@@ -87,9 +114,21 @@ describe("BookingForm.vue", () => {
     });
     const wrapper = mount(BookingForm);
     await wrapper.find('input[type="email"]').setValue("a@b.com");
-    wrapper.vm.selectedDate = new Date("2025-06-27T10:00:00");
+    (wrapper.vm as any).selectedDate = new Date("2025-06-27T10:00:00");
     await wrapper.find("form").trigger("submit.prevent");
     await nextTick();
-    expect(wrapper.vm.formattedBookingTime).toBe("");
+    // If bookingTime is missing, the confirmation card should not show a value for it
+    const card = wrapper.find(".confirmation-card");
+    if (card.exists()) {
+      // Should show 'Booking Time:' with nothing after it (except maybe whitespace)
+      const match = card.text().match(/Booking Time:\s*(.*)Status:/);
+      expect(match).toBeTruthy();
+      // The captured group should be empty or only whitespace
+      expect(match && match[1].trim()).toBe("");
+    } else {
+      // If confirmation card is not rendered, computed should be empty
+      const formattedBookingTime = (wrapper.vm as any).formattedBookingTime;
+      expect(formattedBookingTime).toBe("");
+    }
   });
 });

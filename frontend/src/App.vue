@@ -4,6 +4,7 @@
       <div class="nav-links">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/bookings">My Bookings</RouterLink>
+        <RouterLink to="/stream-bookings">Live Bookings Stream</RouterLink>
       </div>
       <ThemeToggle />
     </nav>
