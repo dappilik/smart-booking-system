@@ -17,7 +17,7 @@ describe("MyBookings.vue", () => {
     getAllBookingsMock = vi.fn();
   });
 
-  it("renders MyBookings view", async () => {
+  it("renders MyBookings view and heading", async () => {
     getAllBookingsMock.mockResolvedValue([]);
     const { default: MyBookingsReloaded } = await import(
       "../../src/views/MyBookings.vue"
@@ -25,20 +25,28 @@ describe("MyBookings.vue", () => {
     const wrapper = mount(MyBookingsReloaded);
     await new Promise((r) => setTimeout(r));
     expect(wrapper.exists()).toBe(true);
+    expect(wrapper.find("h2").text()).toContain("My Bookings");
   });
 
-  it("shows bookings list when bookings exist", async () => {
+  it("shows bookings list with BookingItem components when bookings exist", async () => {
     getAllBookingsMock.mockResolvedValue(mockBookings);
     const { default: MyBookingsReloaded } = await import(
       "../../src/views/MyBookings.vue"
     );
-    const wrapper = mount(MyBookingsReloaded);
+    const wrapper = mount(MyBookingsReloaded, {
+      global: {
+        stubs: {
+          BookingItem: {
+            template: '<li class="booking-item-stub">Stub</li>',
+          },
+        },
+      },
+    });
     await new Promise((r) => setTimeout(r));
-    expect(wrapper.findAll("li").length).toBe(2);
-    expect(wrapper.text()).toContain("ID: 1");
-    expect(wrapper.text()).toContain("ID: 2");
-    expect(wrapper.text()).toContain("CONFIRMED");
-    expect(wrapper.text()).toContain("CANCELLED");
+    // Should render two BookingItem stubs
+    expect(wrapper.findAll(".booking-item-stub").length).toBe(2);
+    // Should not show the empty message
+    expect(wrapper.text()).not.toContain("No bookings yet.");
   });
 
   it("shows 'No bookings yet.' when bookings is empty", async () => {

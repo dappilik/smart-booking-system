@@ -28,7 +28,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
-        assertNull(response.getBody().get("message"));
+        assertEquals("Validation failed", response.getBody().get("message"));
     }
 
     @Test
@@ -91,7 +91,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals(400, response.getBody().get("status"));
         assertEquals("Bad Request", response.getBody().get("error"));
-        assertNull(response.getBody().get("message"));
+        assertEquals("Validation failed", response.getBody().get("message"));
         assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("field1"));
         assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("field2"));
     }
@@ -161,7 +161,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertNull(response.getBody().get("message"));
+        assertEquals("Validation failed", response.getBody().get("message"));
         assertTrue(((Map<?, ?>)response.getBody().get("fieldErrors")).containsKey("field1"));
         assertNull(((Map<?, ?>)response.getBody().get("fieldErrors")).get("field1"));
     }

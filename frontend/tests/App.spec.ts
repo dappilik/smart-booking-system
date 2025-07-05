@@ -7,7 +7,7 @@ const RouterLinkStub = {
 };
 
 describe("App.vue", () => {
-  it("renders navigation links", () => {
+  it("renders all navigation links", () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -19,9 +19,10 @@ describe("App.vue", () => {
     });
     expect(wrapper.text()).toContain("Home");
     expect(wrapper.text()).toContain("My Bookings");
+    expect(wrapper.text()).toContain("Live Bookings Stream");
   });
 
-  it("contains ThemeToggle component", () => {
+  it("renders ThemeToggle component in navbar", () => {
     const wrapper = mount(App, {
       global: {
         stubs: {
@@ -31,6 +32,8 @@ describe("App.vue", () => {
         },
       },
     });
-    expect(wrapper.findComponent({ name: "ThemeToggle" }).exists()).toBe(true);
+    // Check ThemeToggle stub is present in the navbar
+    const navbar = wrapper.find(".navbar");
+    expect(navbar.html()).toContain("theme-toggle-stub");
   });
 });

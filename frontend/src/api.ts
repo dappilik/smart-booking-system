@@ -1,9 +1,11 @@
-import axios from 'axios';
-import type { BookingRequest, BookingResponse } from './types/booking';
+import axios from "axios";
+import type { BookingRequest, BookingResponse } from "./types/booking";
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = "http://localhost:8080/api";
 
-export async function createBooking(data: BookingRequest): Promise<BookingResponse> {
+export async function createBooking(
+  data: BookingRequest
+): Promise<BookingResponse> {
   const response = await axios.post(`${API_BASE}/bookings`, data);
   return response.data;
 }
@@ -18,3 +20,24 @@ export async function getAllBookings(): Promise<BookingResponse[]> {
   return res.data;
 }
 
+// Get bookings as a stream using text/event-stream (SSE)
+export function streamBookings(
+  onMessage: (data: BookingResponse) => void,
+  onError?: (err: Event) => void
+): EventSource {
+  // Use ?stream=true as required by backend
+  const eventSource = new EventSource(`${API_BASE}/bookings?stream=true`);
+  eventSource.onmessage = (event) => {
+    try {
+      const data: BookingResponse = JSON.parse(event.data);
+      onMessage(data);
+    } catch (e) {
+      console.error("Error parsing event data:", e);
+      if (onError) onError(event);
+    }
+  };
+  if (onError) {
+    eventSource.onerror = onError;
+  }
+  return eventSource;
+}

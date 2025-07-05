@@ -36,7 +36,8 @@ public class BookingController {
         log.info("Fetching bookings for email: {}, stream: {}", email, stream);
         if (stream) {
             // Add delay to simulate streaming
-            return bookings.delayElements(java.time.Duration.ofSeconds(1));
+            return bookings.delayElements(java.time.Duration.ofSeconds(1)).doOnComplete(() ->
+                log.info("Completed streaming bookings for email: {}", email));
         } else {
             return bookings.collectList().flatMapMany(Flux::fromIterable);
         }
