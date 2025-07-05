@@ -32,6 +32,7 @@ export function streamBookings(
       const data: BookingResponse = JSON.parse(event.data);
       onMessage(data);
     } catch (e) {
+      console.error("Error parsing event data:", e);
       if (onError) onError(event);
     }
   };

@@ -30,7 +30,9 @@ onMounted(() => {
       }
     },
     (_err: Event) => {
-      error.value = "Failed to connect or stream closed.";
+      error.value =
+        "Failed to connect or stream closed." +
+        (_err instanceof Error ? `: ${_err.message}` : "");
     }
   );
 });
